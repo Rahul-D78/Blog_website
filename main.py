@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import random as rand
 
 app = Flask(__name__)
 
@@ -7,7 +8,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
 
 ##Cafe TABLE Configuration
 class Cafe(db.Model):
@@ -27,7 +27,38 @@ class Cafe(db.Model):
 @app.route("/")
 def home():
     return render_template("index.html")
-    
+
+# def to_dict(self):
+        #Method 1. 
+        # dictionary = {}
+        # Loop through each column in the data record
+        # for column in self.__table__.columns:
+            #Create a new dictionary entry;
+            # where the key is the name of the column
+            # and the value is the value of the column
+            # dictionary[column.name] = getattr(self, column.name)
+        # return dictionary
+        
+        #Method 2. Altenatively use Dictionary Comprehension to do the same thing.
+        #return {column.name: getattr(self, column.name) for column in self.__table__.columns}    
+
+@app.route("/random")
+def get_random_cafe():
+    cafes = db.session.query(Cafe).all()
+    random_cafe = rand.choice(cafes)
+    #Simply convert the random_cafe data record to a dictionary of key-value pairs. 
+    return jsonify(Cafe={"id": random_cafe.id,
+        "name": random_cafe.name,
+        "map_url": random_cafe.map_url,
+        "img_url": random_cafe.img_url,
+        "location": random_cafe.location,
+        "seats": random_cafe.seats,
+        "has_toilet": random_cafe.has_toilet,
+        "has_wifi": random_cafe.has_wifi,
+        "has_sockets": random_cafe.has_sockets,
+        "can_take_calls": random_cafe.can_take_calls,
+        "coffee_price": random_cafe.coffee_price,}
+)    
 
 ## HTTP GET - Read Record
 
